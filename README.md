@@ -226,6 +226,11 @@ constants near the top of `lens.py` (`PINK_*`, `TONE_COLORS`, `WIN_W_MIN`,
 To refresh the dictionaries later, run `./fetch_dicts.sh`. It re-downloads the
 raw sources (~290 MB), rebuilds the lexicons, and deletes the raw files again.
 
+## License
+
+The source code is MIT — see LICENSE. The dictionary data is CC BY-SA 4.0 and
+remains so; the two are separate works.
+
 ## Credits
 
 All dictionary data is openly licensed, CC BY-SA 4.0:
