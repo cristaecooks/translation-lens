@@ -1,0 +1,25 @@
+# build products and environment — regenerated, never committed
+.venv/
+build/
+dist/
+__pycache__/
+*.pyc
+AppIcon.iconset/
+
+# Dictionary data is generated, not authored.  fetch_dicts.sh re-downloads the
+# sources and build_dicts.py rebuilds these, so committing ~90 MB of derived
+# files into git history would bloat every clone for no benefit.
+data/*.pickle
+data/*.sqlite3
+data/*.jsonl
+data/cedict.txt
+data/*.gz
+
+# local state
+data/settings.json
+data/*.log
+.verify-state.json
+
+# editor and OS leftovers
+~$*
+.DS_Store

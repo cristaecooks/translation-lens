@@ -1,0 +1,30 @@
+Translation Lens — licenses and attribution
+======================================
+
+DICTIONARY DATA — Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)
+
+  Chinese   CC-CEDICT — https://www.mdbg.net/chinese/dictionary?page=cc-cedict
+  Japanese  JMdict/EDICT, Electronic Dictionary Research and Development
+            Group — https://www.edrdg.org/jmdict/j_jmdict.html
+  Korean    English Wiktionary, extracted by kaikki.org
+  French, Spanish, Italian, German
+            WikDict — https://www.wikdict.com — derived from Wiktionary
+
+  The lexicon files shipped with this application (data/lex-*.pickle) are
+  adaptations of the above databases and remain licensed CC BY-SA 4.0.
+  Full license: https://creativecommons.org/licenses/by-sa/4.0/
+  The adapted lexicons are available on request.
+
+SOFTWARE LIBRARIES
+
+  jieba          MIT      Chinese word segmentation
+  pypinyin       MIT      pinyin readings
+  simplemma      MIT      lemmatisation
+  PyObjC         MIT      macOS framework bindings
+  NumPy          BSD-3    image analysis
+  Python         PSF
+
+SYSTEM FRAMEWORKS
+
+  Text recognition uses Apple's Vision framework and speech uses
+  AVSpeechSynthesizer. Both run on-device; no text leaves the machine.
