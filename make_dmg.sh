@@ -14,26 +14,13 @@ STAGE="$(mktemp -d)"
 
 [ -d "$APP" ] || { echo "build the app first: python -m PyInstaller TranslationLens.spec"; exit 1; }
 
-# The install guide is authored in Word. Regenerate the plain-text copy the
-# disk image carries whenever the .docx is the newer of the two, so edits made
-# in Word can't silently fail to reach customers.
-if [ -f "$DIR/Read Me First.docx" ]; then
-  if [ ! -f "$DIR/Read Me First.txt" ] || \
-     [ "$DIR/Read Me First.docx" -nt "$DIR/Read Me First.txt" ]; then
-    echo "regenerating Read Me First.txt from the Word document…"
-    textutil -convert txt -encoding UTF-8 \
-      -output "$DIR/Read Me First.txt" "$DIR/Read Me First.docx"
-  fi
-fi
-
 echo "staging…"
 cp -R "$APP" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 cp "$DIR/LICENSES.txt" "$STAGE/Licenses.txt" 2>/dev/null || true
 # the install guide is the first thing a buyer should see
-# prefer the PDF the customer folder uses, falling back to plain text
-cp "$HOME/Desktop/Translation Lens/READ ME.pdf" "$STAGE/READ ME.pdf" 2>/dev/null \
-  || cp "$DIR/Read Me First.txt" "$STAGE/Read Me First.txt" 2>/dev/null || true
+# the install guide that ships with the app
+cp "$DIR/READ ME.pdf" "$STAGE/READ ME.pdf"
 
 rm -f "$DMG"
 # ULMO (LZMA) is markedly smaller than the default zlib: 50 MB vs 78 MB.

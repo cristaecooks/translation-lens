@@ -23,3 +23,7 @@ data/*.log
 # editor and OS leftovers
 ~$*
 .DS_Store
+
+# superseded by READ ME.pdf, kept locally only
+Read Me First.docx
+Read Me First.txt
