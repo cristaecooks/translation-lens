@@ -1,5 +1,17 @@
 # Translation Lens (macOS)
 
+### [⬇ Download Translation Lens](https://github.com/cristaecooks/translation-lens/releases/latest)
+
+Requires **macOS 12 or later** on **Apple silicon** (M1/M2/M3/M4). 50 MB.
+
+Open the `.dmg` and **drag the app into your Applications folder** — don't run
+it from the disk image, or macOS won't remember its Screen Recording
+permission. On first launch macOS will say it "cannot verify" the app because
+it isn't notarized: choose Cancel, then System Settings → Privacy & Security →
+**Open Anyway**. Full steps are in `READ ME.pdf` inside the download.
+
+---
+
 A small always-on-top window for reading comics in another language. Drag
 the frame over a word or a whole speech bubble, let go, and it reads what's
 underneath: **pronunciation plus dictionary definitions.**
