@@ -1,6 +1,6 @@
 # Translation Lens (macOS)
 
-### [⬇ Download Translation Lens](https://github.com/cristaecooks/translation-lens/releases/latest)
+### [⬇ Download Translation Lens](https://github.com/cristaecooks/Translation-Lens-MacOS/releases/latest)
 
 Requires **macOS 12 or later** on **Apple silicon** (M1/M2/M3/M4). 50 MB.
 
