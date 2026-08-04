@@ -16,17 +16,24 @@ A small always-on-top window for reading comics in another language. Drag
 the frame over a word or a whole speech bubble, let go, and it reads what's
 underneath: **pronunciation plus dictionary definitions.**
 
-Seven languages, picked from the globe button in the title bar:
+Eleven languages, picked from the globe button in the title bar:
 
-| | Pronunciation shown | Dictionary |
-| --- | --- | --- |
-| Chinese (Mandarin) | pinyin, color-coded by tone | CC-CEDICT, 198k words |
-| Japanese | kana + romaji | JMdict, 464k |
-| Korean | Revised Romanization | Wiktionary, 33k |
-| French | — | Wiktionary, 163k |
-| Spanish | — | Wiktionary, 97k |
-| Italian | — | Wiktionary, 71k |
-| German | — | Wiktionary, 144k |
+| | Pronunciation shown | Spoken | Dictionary |
+| --- | --- | --- | --- |
+| Chinese (Mandarin) | pinyin, color-coded by tone | yes | CC-CEDICT, 198k words |
+| Japanese | kana + romaji | yes | JMdict, 464k |
+| Korean | Revised Romanization | yes | Wiktionary, 33k |
+| French | — | yes | Wiktionary, 163k |
+| German | — | yes | Wiktionary, 144k |
+| Spanish | — | yes | Wiktionary, 97k |
+| Italian | — | yes | Wiktionary, 71k |
+| Portuguese | — | yes | Wiktionary, 67k |
+| Czech | — | yes | Wiktionary, 49k |
+| Turkish | — | yes | Wiktionary, 42k |
+| Latin | — | no voice on macOS | Wiktionary, 24k |
+
+Chinese reads both simplified and traditional. Latin shows definitions only,
+because macOS ships no Latin voice.
 
 Every word gets a 🔈 speaker icon — click it to hear the word in a native
 voice. Your choice of language is remembered between launches, along with the frame
@@ -34,8 +41,10 @@ size and color theme. Everything runs offline on your Mac.
 
 ## First run
 
-1. Double-click **Translation Lens.app** (drag it to your Dock or Applications first
-   if you like — it keeps working from anywhere).
+1. Open the `.dmg` and **drag Translation Lens into your Applications folder.**
+   Don't run it from the disk image: that volume is read-only and its path
+   changes each time it mounts, so macOS cannot remember the permission below
+   and the app will keep asking for it.
 2. macOS will ask for **Screen Recording** permission. Grant it:
    System Settings → Privacy & Security → Screen & System Audio Recording →
    switch on *Translation Lens*.
@@ -147,6 +156,11 @@ Pinyin is colored by tone: 1 mā (red) · 2 má (amber) · 3 mǎ (green) ·
   are shown rather than guessing.
 - Homographs are ranked by real frequency data, so Chinese 說 leads with *shuō*
   and Japanese いる with 居る "to be" rather than 射る "to shoot an arrow".
+- **Czech and Turkish are a step behind the rest.** Vision has no recognizer for
+  either, so their text is read with the English model and the accents come back
+  wrong (Příliš → Prílis). Lookup compensates by matching an accent-free form of
+  both the text and the dictionary, including the lemmatizer's own vocabulary,
+  which recovers most words. A letter genuinely misread cannot be recovered.
 - **Chinese shows every recorded pronunciation.** 那个 gives *nà ge · also nèi
   ge*, 谁 gives *shéi · also shuí*, and 薄 lists all four of *báo / bó / Bó /
   bò* with their own senses. Secondary readings are labelled with the kind of
@@ -176,11 +190,11 @@ Pinyin is colored by tone: 1 mā (red) · 2 má (amber) · 3 mǎ (green) ·
 
 ```
 ./.venv/bin/python -m PyInstaller TranslationLens.spec --noconfirm   # -> dist/Translation Lens.app
-./make_dmg.sh                                                   # -> dist/Translation-Lens-1.0.0.dmg
+./make_dmg.sh                                                   # -> ~/Desktop/Translation-Lens-1.0.0.dmg
 "dist/Translation Lens.app/Contents/MacOS/Translation Lens" --selftest    # verifies the bundle
 ```
 
-The release app is fully self-contained (132 MB): interpreter, PyObjC, all seven
+The release app is fully self-contained (127 MB): interpreter, PyObjC, all eleven
 lexicons and the data files jieba/pypinyin/simplemma load at runtime. It does
 not read anything from this folder, keeps preferences in
 `~/Library/Application Support/Translation Lens/` and logs to
@@ -226,9 +240,10 @@ data/settings.json remembers your language and frame size
 .venv/            dependencies
 ```
 
-To add another language, add a `Language` subclass in `langs.py` (Vision also
-supports Portuguese, Russian, Ukrainian, Thai, Vietnamese and Cantonese) plus a
-builder in `build_dicts.py`.
+To add another language, add a `Language` subclass in `langs.py` plus a builder
+in `build_dicts.py`. Vision can also recognize Russian, Ukrainian, Thai,
+Vietnamese and Cantonese. Languages Vision cannot read at all — Devanagari, so
+no Hindi — would need a different OCR engine.
 
 Edit `lens.py` and just relaunch — no rebuild needed. Rerun `./build_app.sh`
 only if you change the icon or bundle layout. Colors and sizes live in the
