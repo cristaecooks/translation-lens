@@ -1,4 +1,4 @@
-# Translation Lens
+# Translation Lens (macOS)
 
 A small always-on-top window for reading comics in another language. Drag
 the frame over a word or a whole speech bubble, let go, and it reads what's
