@@ -13,6 +13,7 @@ language-specific — tokenising, readings, lookup — lives in langs.py, and th
 lexicons it loads are built by build_dicts.py.
 """
 
+import ctypes
 import json
 import math
 import sys
@@ -1145,7 +1146,7 @@ class Lens(NSObject):
                                     "sizeMenu:", "Frame size")
         self.btnRead = self._button("magnifyingglass", "读", "readNow:", "Read again")
         self.btnToggle = self._button("chevron.up", "▾", "toggleResults:", "Show / hide results")
-        self.btnClose = self._button("xmark", "✕", "quitApp:", "Quit")
+        self.btnClose = self._button("xmark", "✕", "hideLens:", "Hide to menu bar")
         for b in (self.btnTheme, self.btnLang, self.btnSize, self.btnRead,
                   self.btnToggle, self.btnClose):
             content.addSubview_(b)
@@ -1642,6 +1643,17 @@ class Lens(NSObject):
             self.layout()
         self.win.orderFrontRegardless()
 
+    def hideLens_(self, sender):
+        """Hide the window; the menu-bar item (or ⌘E) brings it back."""
+        self.win.orderOut_(None)
+
+    def toggleLens_(self, sender):
+        """⌘E: hide if showing, show if hidden."""
+        if self.win.isVisible():
+            self.hideLens_(sender)
+        else:
+            self.showLens_(sender)
+
     def recenterLens_(self, sender):
         """Park it in the middle of the screen — the way out of 'I lost it'."""
         vis = NSScreen.mainScreen().visibleFrame()
@@ -1657,8 +1669,116 @@ class Lens(NSObject):
         self._sync_toggle_icon()
         self.layout()
 
-    def quitApp_(self, sender):
-        NSApp.terminate_(self)
+
+# ---- global hotkey (Carbon RegisterEventHotKey) -------------------
+# Narrow system API: only the registered shortcut is delivered, so no
+# Accessibility / Input Monitoring permission is required.  Still works
+# while another app is focused — essential for a non-activating panel.
+
+def _four_char(s):
+    """Pack a 4-char string into a Carbon FourCharCode / OSType (uint32).
+
+    Carbon identifies event classes and hotkey owners with four-byte codes
+    written as ASCII in headers (e.g. 'keyb', 'TLen').  ctypes needs the
+    numeric form those APIs actually take.
+    """
+    return (ord(s[0]) << 24) | (ord(s[1]) << 16) | (ord(s[2]) << 8) | ord(s[3])
+
+
+class _EventTypeSpec(ctypes.Structure):
+    _fields_ = [("eventClass", ctypes.c_uint32), ("eventKind", ctypes.c_uint32)]
+
+
+class _EventHotKeyID(ctypes.Structure):
+    _fields_ = [("signature", ctypes.c_uint32), ("id", ctypes.c_uint32)]
+
+
+_EventHandlerProc = ctypes.CFUNCTYPE(
+    ctypes.c_int32,
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+)
+
+_kVK_ANSI_E = 0x0E
+_cmdKey = 1 << 8
+_kEventClassKeyboard = _four_char("keyb")
+_kEventHotKeyPressed = 5
+_noErr = 0
+
+
+class GlobalHotKey:
+    """One system-wide hotkey; keeps C callbacks alive for the process life."""
+
+    _SIG = _four_char("TLen")
+
+    def __init__(self, key_code, modifiers, callback):
+        self._callback = callback
+        self._hot_key_ref = ctypes.c_void_p()
+        self._handler_ref = ctypes.c_void_p()
+        self._carbon = ctypes.cdll.LoadLibrary(
+            "/System/Library/Frameworks/Carbon.framework/Carbon"
+        )
+        c = self._carbon
+        c.GetEventDispatcherTarget.restype = ctypes.c_void_p
+        c.RegisterEventHotKey.argtypes = [
+            ctypes.c_uint32,
+            ctypes.c_uint32,
+            _EventHotKeyID,
+            ctypes.c_void_p,
+            ctypes.c_uint32,
+            ctypes.POINTER(ctypes.c_void_p),
+        ]
+        c.RegisterEventHotKey.restype = ctypes.c_int32
+        c.UnregisterEventHotKey.argtypes = [ctypes.c_void_p]
+        c.UnregisterEventHotKey.restype = ctypes.c_int32
+        c.InstallEventHandler.argtypes = [
+            ctypes.c_void_p,
+            _EventHandlerProc,
+            ctypes.c_uint32,
+            ctypes.POINTER(_EventTypeSpec),
+            ctypes.c_void_p,
+            ctypes.POINTER(ctypes.c_void_p),
+        ]
+        c.InstallEventHandler.restype = ctypes.c_int32
+        c.RemoveEventHandler.argtypes = [ctypes.c_void_p]
+        c.RemoveEventHandler.restype = ctypes.c_int32
+
+        # Keep the UPP alive; Carbon holds only a raw function pointer.
+        self._handler_upp = _EventHandlerProc(self._on_event)
+
+        target = c.GetEventDispatcherTarget()
+        hot_id = _EventHotKeyID(self._SIG, 1)
+        err = c.RegisterEventHotKey(
+            key_code, modifiers, hot_id, target, 0,
+            ctypes.byref(self._hot_key_ref))
+        if err != _noErr or not self._hot_key_ref.value:
+            raise OSError("RegisterEventHotKey failed: %s" % err)
+
+        spec = (_EventTypeSpec * 1)(
+            _EventTypeSpec(_kEventClassKeyboard, _kEventHotKeyPressed))
+        err = c.InstallEventHandler(
+            target, self._handler_upp, 1, spec, None,
+            ctypes.byref(self._handler_ref))
+        if err != _noErr:
+            c.UnregisterEventHotKey(self._hot_key_ref)
+            raise OSError("InstallEventHandler failed: %s" % err)
+
+    def _on_event(self, _call_ref, _event, _user_data):
+        try:
+            self._callback()
+        except Exception:
+            traceback.print_exc()
+        return _noErr
+
+    def unregister(self):
+        c = self._carbon
+        if self._hot_key_ref.value:
+            c.UnregisterEventHotKey(self._hot_key_ref)
+            self._hot_key_ref.value = None
+        if self._handler_ref.value:
+            c.RemoveEventHandler(self._handler_ref)
+            self._handler_ref.value = None
 
 
 class AppDelegate(NSObject):
@@ -1680,7 +1800,7 @@ class AppDelegate(NSObject):
         menu = NSMenu.alloc().init()
         menu.setFont_(rounded_font(13))
         for title, sel, key in (
-                ("Show Lens", "showLens:", ""),
+                ("Show Lens  ⌘E", "showLens:", ""),
                 ("Recenter on Screen", "recenterLens:", ""),
                 (None, None, None),
                 ("Licenses & Credits", "showCredits:", ""),
@@ -1699,6 +1819,14 @@ class AppDelegate(NSObject):
         self.lens.text.textStorage().setAttributedString_(_welcome(self.lens.lang))
         build_menu()
         self.build_status_item()
+        self._hotkey = None
+        try:
+            self._hotkey = GlobalHotKey(
+                _kVK_ANSI_E, _cmdKey,
+                lambda: self.lens.toggleLens_(None))
+        except Exception as exc:
+            sys.stderr.write("⌘E hotkey unavailable: %s\n" % exc)
+            sys.stderr.flush()
         threading.Thread(target=self._load_dict, daemon=True).start()
 
     @objc.python_method
@@ -1726,6 +1854,9 @@ class AppDelegate(NSObject):
         return True
 
     def applicationWillTerminate_(self, note):
+        if getattr(self, "_hotkey", None) is not None:
+            self._hotkey.unregister()
+            self._hotkey = None
         sys.stderr.write("Translation Lens terminating\n")
         sys.stderr.flush()
 

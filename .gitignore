@@ -5,6 +5,7 @@ dist/
 __pycache__/
 *.pyc
 AppIcon.iconset/
+Translation Lens.app/
 
 # Dictionary data is generated, not authored.  fetch_dicts.sh re-downloads the
 # sources and build_dicts.py rebuilds these, so committing ~90 MB of derived
