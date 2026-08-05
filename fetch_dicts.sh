@@ -21,7 +21,7 @@ curl -L --fail -o "$DATA/jmdict_e.gz" "http://ftp.edrdg.org/pub/Nihongo/JMdict_e
 curl -L --fail -o "$DATA/korean-en.jsonl" \
   "https://kaikki.org/dictionary/Korean/kaikki.org-dictionary-Korean.jsonl"
 
-for p in fr es it de; do
+for p in fr es it de pt cs tr la; do
   curl -L --fail -o "$DATA/wikdict-$p-en.sqlite3" "$WIKDICT/$p-en.sqlite3"
 done
 

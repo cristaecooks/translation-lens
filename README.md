@@ -67,7 +67,9 @@ both run locally on your Mac.
 | ⤢ | Quick sizes: Character · Word · Line · Bubble |
 | 🔍 | Read again without moving |
 | ⌃ | Fold the results panel away, leaving just the frame |
-| ✕ or ⌘Q | Quit |
+| ✕ | Hide to the menu-bar icon |
+| ⌘E | Show or hide the lens (works from any app) |
+| ⌘Q or menu-bar Quit | Quit |
 
 The frame is see-through, so position it like a magnifying glass. For Chinese
 and Japanese it reads **both horizontal and vertical** text; Chinese works in

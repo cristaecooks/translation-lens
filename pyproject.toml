@@ -1,0 +1,28 @@
+[project]
+name = "translation-lens-macos"
+version = "0.1.0"
+description = "A small always-on-top app for reading comics in another language."
+readme = "README.md"
+authors = [
+    { name = "cristae_cooks"}
+]
+requires-python = ">=3.14"
+dependencies = [
+    "jieba>=0.42.1",
+    "numpy>=2.5.1",
+    "pyinstaller>=6.21.0",
+    "pyobjc-core>=12.2.1",
+    "pyobjc-framework-avfoundation>=12.2.1",
+    "pyobjc-framework-cocoa>=12.2.1",
+    "pyobjc-framework-quartz>=12.2.1",
+    "pyobjc-framework-vision>=12.2.1",
+    "pypinyin>=0.55.0",
+    "simplemma>=1.1.2",
+]
+
+[project.scripts]
+translation-lens-macos = "translation_lens_macos:main"
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
